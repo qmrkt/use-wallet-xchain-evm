@@ -174,6 +174,13 @@ Total incremental cost over a baseline `@txnlab/use-wallet` Svelte/React app: ro
 - [algorandfoundation/xchain-accounts](https://github.com/algorandfoundation/xchain-accounts) — the xChain Accounts protocol (LogicSig + SDK)
 - [tasosbit/use-wallet-ui](https://github.com/tasosbit/use-wallet-ui) — the (React-only) opinionated UI layer for xChain (transaction transparency, bridge/swap panels, manage UI)
 
+## Example integration
+
+- https://metapost.io/
+
+https://github.com/user-attachments/assets/ac514a56-7bf4-4eda-b0de-d59dacddcfab
+
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md). Issues and PRs welcome.
