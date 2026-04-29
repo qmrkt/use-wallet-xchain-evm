@@ -1,0 +1,65 @@
+{
+  "name": "@questionmarket/use-wallet-xchain-evm",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "xChain EVM (MetaMask / wagmi) wallet adapter for @txnlab/use-wallet v5",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/questionmarket/use-wallet-xchain-evm.git"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "@txnlab/use-wallet": ">=5.0.0-rc.1 <6",
+    "@algorandfoundation/algokit-utils": "^9.2.0",
+    "@wagmi/core": "^2",
+    "algo-x-evm-sdk": "*",
+    "algosdk": "^3.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@txnlab/use-wallet": "5.0.0-rc.1",
+    "@algorandfoundation/algokit-utils": "9.2.0",
+    "@wagmi/core": "2.22.1",
+    "algo-x-evm-sdk": "0.1.2",
+    "algosdk": "3.5.2",
+    "tsdown": "0.21.0",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "keywords": [
+    "algorand",
+    "use-wallet",
+    "xchain",
+    "evm",
+    "metamask",
+    "wagmi",
+    "svelte",
+    "react",
+    "vue",
+    "solid"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "start": "tsdown --watch",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
+  }
+}
