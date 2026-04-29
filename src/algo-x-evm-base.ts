@@ -176,7 +176,11 @@ export abstract class AlgoXEvmBaseWallet<
         const algorandAddress = allTxns[idx].sender.toString()
         const evmAddress = this.evmAddressMap.get(algorandAddress)
         if (!evmAddress) {
-          throw new Error(`No EVM address found for Algorand address: ${algorandAddress}`)
+          throw new Error(
+            `No EVM address mapped for Algorand address ${algorandAddress}. ` +
+              `This usually means the wallet session was lost or the connected EVM ` +
+              `account does not derive this Algorand address. Try disconnecting and reconnecting.`
+          )
         }
         const group = evmGroups.get(evmAddress)
         if (group) {

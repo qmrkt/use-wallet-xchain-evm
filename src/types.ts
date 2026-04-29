@@ -17,6 +17,16 @@ export type XChainWalletMetadata = WalletMetadata & {
   isAlgoXEvm: 'EVM'
 }
 
+/**
+ * Minimal EIP-1193 provider shape — the return type of
+ * `XChainEvmAdapter.getEvmProvider()`. Consumers can use this for arbitrary
+ * `eth_*` RPC calls on top of the same connector backing this adapter (e.g.
+ * for bridge transactions).
+ */
+export interface Eip1193Provider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
+}
+
 export interface UiHooks {
   onConnect?: (evmAccount: EvmAccount) => void
   onBeforeSign?: (

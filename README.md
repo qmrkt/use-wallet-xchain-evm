@@ -89,24 +89,78 @@ xchainEvm({
 
 ## Network switching
 
-The adapter caches the underlying `AlgoXEvmSdk` against the active network. When you call `walletManager.setActiveNetwork(...)`, the cache is invalidated automatically and the SDK rebuilds against the new algod client. Address derivation is deterministic from the EVM address (so the derived Algorand address is the same on every network), but signatures are bound to the network's genesis hash via the txn ID.
+The adapter caches the underlying `AlgoXEvmSdk` against the active network. When you call `walletManager.setActiveNetwork(...)`, the cache is invalidated automatically and the SDK rebuilds against the new algod client. Address derivation is deterministic from the EVM address (so the derived Algorand address is the same on every network), but signatures are bound to the network's genesis hash via the txn ID. **Tested:** `algo-x-evm-base.test.ts` asserts the SDK rebuild on `activeNetwork` change.
 
 ## Connect-modal UX
 
 This package only owns the wallet-adapter side. The host app builds the EVM-wallet picker — `getEvmAccounts: () => Promise<string[]>` is the seam. v0 examples hardcode `injected()` (MetaMask et al.). For richer UX, build a Svelte/React/Vue component that lists `wagmiConfig.connectors`, lets the user pick, calls `connect(wagmiConfig, { connector })`, and resolves the promise.
 
-(For React apps that already use RainbowKit, you can pass RainbowKit's `useConnectModal` wrapper as `getEvmAccounts`.)
+For React apps that already use RainbowKit, you can use `setGetEvmAccounts(fn)` to inject the callback after the React tree has mounted (RainbowKit's `useConnectModal` only works inside `<RainbowKitProvider>`, which mounts after `WalletManager` instantiation).
+
+## SSR / SvelteKit notes
+
+The adapter dynamically imports `@wagmi/core`, `algo-x-evm-sdk`, and `@algorandfoundation/algokit-utils` inside method bodies — none of those load at module-import time. That keeps top-level import safe on the server.
+
+If you use SvelteKit with SSR enabled, externalize the package and its EVM-side peer deps in `vite.config.ts` so they don't run through Vite's SSR transform:
+
+```ts
+ssr: {
+  external: [
+    '@questionmarket/use-wallet-xchain-evm',
+    '@wagmi/core',
+    '@wagmi/connectors',
+    'viem',
+    'algo-x-evm-sdk',
+    '@algorandfoundation/algokit-utils',
+  ],
+},
+```
+
+The adapter itself only runs in the browser (it reads `window.ethereum` via wagmi connectors). If you call adapter methods from a `+server.ts` handler, they'll fail at the wagmi connector layer — by design.
+
+## Bundle size
+
+This package: ~15 KB gzipped (~50 KB raw). The bulk of what you ship comes from peer deps:
+
+| Peer dep                            | Approx. gzipped impact                      |
+|-------------------------------------|---------------------------------------------|
+| `@wagmi/core`                       | ~30 KB                                      |
+| `viem` (transitive via wagmi)       | ~80 KB                                      |
+| `@wagmi/connectors` (per connector) | ~20–40 KB each (WalletConnect is heaviest)  |
+| `algo-x-evm-sdk`                    | ~10 KB                                      |
+| `@algorandfoundation/algokit-utils` | ~30 KB (you likely already ship it)         |
+
+Total incremental cost over a baseline `@txnlab/use-wallet` Svelte/React app: roughly **150–200 KB gzipped** if you weren't already using wagmi. Not free; budget accordingly.
 
 ## Caveats
 
 - **EVM-derived accounts start with 0 ALGO.** The derived Algorand address is empty until funded. Algorand requires a minimum balance to exist (~0.1 ALGO) and an opt-in transaction (costs ALGO) to receive ASAs. Sponsored opt-ins are the standard fix; otherwise users need to send ALGO to the derived address before doing anything.
 - **MetaMask shows the user EIP-712 typed data, not txn semantics.** The user sees the Algorand transaction ID hash inside an EIP-712 envelope, not "send 5 ALGO to X". Surface a pre-sign dialog via `uiHooks.onBeforeSign` if your app handles non-trivial transactions.
-- **Browser polyfills.** If you use Allbridge or other EVM SDKs alongside, you may need `Buffer` and `TronWebProto` polyfills. This package itself doesn't require them; the underlying `algo-x-evm-sdk` and `@wagmi/core` are browser-clean.
-- **No bridges, no fiat on-ramps.** This package only handles wallet connection and signing. Funding the derived account is your app's responsibility (deep-links to MoonPay, ChangeNOW, etc., or Allbridge for cross-chain stablecoin bridging).
+- **Connector-name detection is partial.** wagmi's `injected()` reports `connector.name = 'Injected'` when the underlying provider doesn't self-identify (browser, extension version, etc.); this adapter falls back to "EVM Wallet" in that case. Wallets that report a real name (MetaMask, Brave Wallet, Rabby, Coinbase Wallet) come through correctly. The generic-name list is small and conservative — file an issue if you see a meaningless name passing through.
+- **No bridges, no fiat on-ramps.** This package only handles wallet connection and signing. Funding the derived account is your app's responsibility.
 
 ## Status
 
-`0.1.0` — proven end-to-end with MetaMask connection + Algorand address derivation in two Svelte apps (`metapost`, `question.market`). Real-transaction signing path is implemented and unit-tested in concept; on-chain testnet signing has been validated [TODO: edit once verified]. Treat as beta. Issues and PRs welcome.
+`0.1.0` — beta.
+
+| Area                                     | Status                                           |
+|------------------------------------------|--------------------------------------------------|
+| TypeScript build (`tsdown`)              | ✅ green, ESM + dts                              |
+| TypeScript strict typecheck              | ✅ green                                         |
+| Unit tests (28 tests, 2 files)           | ✅ green, run via `pnpm test`                    |
+| Connect path (existing connection)       | ✅ unit-tested + integration-tested in browser   |
+| Connect path (callback)                  | ✅ unit-tested                                   |
+| Connect path (first-connector fallback)  | ✅ unit-tested                                   |
+| `connector.name === 'Injected'` filter   | ✅ unit-tested                                   |
+| Disconnect                               | ✅ unit-tested                                   |
+| `signTransactions` happy path            | ✅ unit-tested                                   |
+| `signTransactions` indexesToSign filter  | ✅ unit-tested                                   |
+| `signTransactions` already-signed skip   | ✅ unit-tested                                   |
+| `signTransactions` error → onAfterSign   | ✅ unit-tested                                   |
+| `evmAddressMap` recovery from store      | ✅ unit-tested                                   |
+| Multi-signer grouping                    | ✅ unit-tested                                   |
+| `uiHooks` (onBeforeSign / onAfterSign / onConnect) | ✅ unit-tested                         |
+| Network-switch SDK invalidation          | ✅ unit-tested                                   |
 
 ## Related projects
 
@@ -114,6 +168,10 @@ This package only owns the wallet-adapter side. The host app builds the EVM-wall
 - [tasosbit/use-wallet](https://github.com/tasosbit/use-wallet) — the v4 fork where xChain EVM was originally implemented
 - [algorandfoundation/xchain-accounts](https://github.com/algorandfoundation/xchain-accounts) — the xChain Accounts protocol (LogicSig + SDK)
 - [tasosbit/use-wallet-ui](https://github.com/tasosbit/use-wallet-ui) — the (React-only) opinionated UI layer for xChain (transaction transparency, bridge/swap panels, manage UI)
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md). Issues and PRs welcome.
 
 ## License
 

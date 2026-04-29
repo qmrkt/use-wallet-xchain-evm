@@ -16,4 +16,11 @@ export function xchainEvm(options: XChainEvmOptions): WalletAdapterConfig {
 
 export { XChainEvmAdapter }
 export { AlgoXEvmBaseWallet } from './algo-x-evm-base'
-export type { AlgoXEvmOptions, XChainEvmOptions, EvmAccount, UiHooks } from './types'
+export type {
+  AlgoXEvmOptions,
+  XChainEvmOptions,
+  XChainWalletMetadata,
+  EvmAccount,
+  UiHooks,
+  Eip1193Provider
+} from './types'

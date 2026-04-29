@@ -9,7 +9,7 @@ import type {
 
 import { AlgoXEvmBaseWallet } from './algo-x-evm-base'
 import { icon } from './icon'
-import type { XChainEvmOptions, XChainWalletMetadata } from './types'
+import type { Eip1193Provider, XChainEvmOptions, XChainWalletMetadata } from './types'
 
 const ICON = `data:image/svg+xml;base64,${btoa(icon)}`
 
@@ -43,7 +43,16 @@ export class XChainEvmAdapter extends AlgoXEvmBaseWallet<XChainEvmOptions> {
     return this._disconnecting
   }
 
-  /** Update the consumer-supplied EVM connect callback after construction. */
+  /**
+   * Update the consumer-supplied EVM connect callback after construction.
+   *
+   * Most consumers can pass `getEvmAccounts` via `xchainEvm({ getEvmAccounts })`
+   * at construction time and never call this. The setter exists for hosts where
+   * the callback can only be built after the wallet manager is constructed —
+   * notably React + RainbowKit, where opening the connect modal requires
+   * `useConnectModal` from inside `<RainbowKitProvider>`, which mounts after
+   * `WalletManager` instantiation.
+   */
   public setGetEvmAccounts(fn: () => Promise<string[]>): void {
     this.options.getEvmAccounts = fn
   }
@@ -56,20 +65,18 @@ export class XChainEvmAdapter extends AlgoXEvmBaseWallet<XChainEvmOptions> {
     this.logger.info('Using wagmi for EVM provider management')
   }
 
-  private async getRawProvider(): Promise<{
-    request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
-  }> {
+  private async getRawProvider(): Promise<Eip1193Provider> {
     const { getAccount } = await import('@wagmi/core')
     const account = getAccount(this.wagmiConfig)
     if (!account.connector) {
-      throw new Error('No EVM wallet connector available')
+      throw new Error(
+        'No EVM wallet connector available — connect an EVM wallet first via xchainEvm({ getEvmAccounts })'
+      )
     }
-    return account.connector.getProvider() as Promise<{
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
-    }>
+    return account.connector.getProvider() as Promise<Eip1193Provider>
   }
 
-  public async getEvmProvider(): Promise<unknown> {
+  public async getEvmProvider(): Promise<Eip1193Provider> {
     return this.getRawProvider()
   }
 
@@ -171,9 +178,10 @@ export class XChainEvmAdapter extends AlgoXEvmBaseWallet<XChainEvmOptions> {
 
   private applyConnectorMetadata(connectorInfo: ConnectorInfo): void {
     const updates: Partial<WalletMetadata> = {}
-    // Skip generic connector names like "Injected" that don't identify the
-    // underlying wallet — keep the adapter's default ("EVM Wallet") instead.
-    if (connectorInfo.name && connectorInfo.name.toLowerCase() !== 'injected') {
+    // Skip generic connector names that don't identify the underlying wallet
+    // (e.g. wagmi's `injected()` reports "Injected" when the provider didn't
+    // self-identify). Keep the adapter's default ("EVM Wallet") in those cases.
+    if (connectorInfo.name && !XChainEvmAdapter.isGenericConnectorName(connectorInfo.name)) {
       updates.name = connectorInfo.name
     }
     if (connectorInfo.icon) updates.icon = connectorInfo.icon
@@ -181,6 +189,17 @@ export class XChainEvmAdapter extends AlgoXEvmBaseWallet<XChainEvmOptions> {
       this.metadata = { ...this.metadata, ...updates }
       this.logger.info(`Wallet metadata updated: ${updates.name ?? '(no name)'}`)
     }
+  }
+
+  /**
+   * Generic connector names that don't identify the underlying EVM wallet.
+   * Add to this list as we discover other meaningless names from connector
+   * implementations. Comparison is case-insensitive.
+   */
+  private static readonly GENERIC_CONNECTOR_NAMES = new Set(['injected', 'unknown', ''])
+
+  private static isGenericConnectorName(name: string): boolean {
+    return XChainEvmAdapter.GENERIC_CONNECTOR_NAMES.has(name.trim().toLowerCase())
   }
 
   public connect = async (): Promise<WalletAccount[]> => {

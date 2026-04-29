@@ -2,7 +2,8 @@
   "name": "@questionmarket/use-wallet-xchain-evm",
   "version": "0.1.0",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "description": "xChain EVM (MetaMask / wagmi) wallet adapter for @txnlab/use-wallet v5",
   "license": "MIT",
@@ -25,8 +26,8 @@
   "peerDependencies": {
     "@txnlab/use-wallet": ">=5.0.0-rc.1 <6",
     "@algorandfoundation/algokit-utils": "^9.2.0",
-    "@wagmi/core": "^2",
-    "algo-x-evm-sdk": "*",
+    "@wagmi/core": ">=2.20.0 <3",
+    "algo-x-evm-sdk": "^0.1.0",
     "algosdk": "^3.0.0"
   },
   "dependencies": {},
