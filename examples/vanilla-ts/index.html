@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>use-wallet-xchain-evm — Vanilla TS example</title>
+    <style>
+      main { max-width: 800px; margin: 2rem auto; padding: 1rem; font-family: system-ui, sans-serif; }
+      button { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; }
+      code { background: #f4f4f4; padding: 0.1rem 0.3rem; border-radius: 3px; word-break: break-all; }
+      pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+      .error { color: #c00; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>use-wallet-xchain-evm — Vanilla TS demo</h1>
+      <p>
+        Connects an EVM wallet (MetaMask et al.), derives an Algorand address via xChain Accounts,
+        signs a 0-ALGO self-payment.
+      </p>
+
+      <button id="connect">Connect EVM wallet</button>
+
+      <section id="connected" class="hidden">
+        <h2>Active account</h2>
+        <p>
+          <strong>Algorand address (derived):</strong>
+          <code id="address"></code>
+        </p>
+        <button id="sign">Sign test txn</button>
+        <button id="disconnect">Disconnect</button>
+      </section>
+
+      <p id="error" class="error hidden"></p>
+
+      <section id="signed-section" class="hidden">
+        <h2>Signed txn (hex)</h2>
+        <pre id="signed"></pre>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

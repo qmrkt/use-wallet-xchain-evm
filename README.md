@@ -89,7 +89,7 @@ xchainEvm({
 
 ## Network switching
 
-The adapter caches the underlying `AlgoXEvmSdk` against the active network. When you call `walletManager.setActiveNetwork(...)`, the cache is invalidated automatically and the SDK rebuilds against the new algod client. Address derivation is deterministic from the EVM address (so the derived Algorand address is the same on every network), but signatures are bound to the network's genesis hash via the txn ID. **Tested:** `algo-x-evm-base.test.ts` asserts the SDK rebuild on `activeNetwork` change.
+The adapter caches the underlying `AlgoXEvmSdk` against the active network. When you call `walletManager.setActiveNetwork(...)`, the cache is invalidated automatically and the SDK rebuilds against the new algod client. Address derivation is deterministic from the EVM address (so the derived Algorand address is the same on every network), but signatures are bound to the network's genesis hash via the txn ID.
 
 ## Connect-modal UX
 
@@ -116,11 +116,11 @@ ssr: {
 },
 ```
 
-The adapter itself only runs in the browser (it reads `window.ethereum` via wagmi connectors). If you call adapter methods from a `+server.ts` handler, they'll fail at the wagmi connector layer — by design.
+The adapter itself only runs in the browser (it reads `window.ethereum` via wagmi connectors).
 
 ## Bundle size
 
-This package: ~15 KB gzipped (~50 KB raw). The bulk of what you ship comes from peer deps:
+This package: ~5 KB gzipped (~16 KB raw). The bulk of what you ship comes from peer deps:
 
 | Peer dep                            | Approx. gzipped impact                      |
 |-------------------------------------|---------------------------------------------|
@@ -130,13 +130,13 @@ This package: ~15 KB gzipped (~50 KB raw). The bulk of what you ship comes from 
 | `algo-x-evm-sdk`                    | ~10 KB                                      |
 | `@algorandfoundation/algokit-utils` | ~30 KB (you likely already ship it)         |
 
-Total incremental cost over a baseline `@txnlab/use-wallet` Svelte/React app: roughly **150–200 KB gzipped** if you weren't already using wagmi. Not free; budget accordingly.
+Total incremental cost over a baseline `@txnlab/use-wallet` Svelte/React app: roughly **150–200 KB gzipped** if you weren't already using wagmi.
 
 ## Caveats
 
 - **EVM-derived accounts start with 0 ALGO.** The derived Algorand address is empty until funded. Algorand requires a minimum balance to exist (~0.1 ALGO) and an opt-in transaction (costs ALGO) to receive ASAs. Sponsored opt-ins are the standard fix; otherwise users need to send ALGO to the derived address before doing anything.
 - **MetaMask shows the user EIP-712 typed data, not txn semantics.** The user sees the Algorand transaction ID hash inside an EIP-712 envelope, not "send 5 ALGO to X". Surface a pre-sign dialog via `uiHooks.onBeforeSign` if your app handles non-trivial transactions.
-- **Connector-name detection is partial.** wagmi's `injected()` reports `connector.name = 'Injected'` when the underlying provider doesn't self-identify (browser, extension version, etc.); this adapter falls back to "EVM Wallet" in that case. Wallets that report a real name (MetaMask, Brave Wallet, Rabby, Coinbase Wallet) come through correctly. The generic-name list is small and conservative — file an issue if you see a meaningless name passing through.
+- **Connector-name detection is partial.** wagmi's `injected()` reports `connector.name = 'Injected'` when the underlying provider doesn't self-identify; this adapter falls back to "EVM Wallet" in that case. Wallets that report a real name (MetaMask, Brave Wallet, Rabby, Coinbase Wallet) come through correctly.
 - **No bridges, no fiat on-ramps.** This package only handles wallet connection and signing. Funding the derived account is your app's responsibility.
 
 ## Status

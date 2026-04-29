@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>e2e-tests target</title>
+  </head>
+  <body>
+    <main>
+      <h1>e2e target</h1>
+      <button id="connect" data-testid="connect">Connect EVM wallet</button>
+      <p>
+        <strong>Algorand:</strong> <code id="address" data-testid="address"></code>
+      </p>
+      <button id="sign" data-testid="sign" disabled>Sign test txn</button>
+      <pre id="signed" data-testid="signed"></pre>
+      <p id="error" data-testid="error"></p>
+    </main>
+    <script type="module" src="/src/app.ts"></script>
+  </body>
+</html>

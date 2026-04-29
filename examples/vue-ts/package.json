@@ -1,0 +1,31 @@
+{
+  "name": "@algorade-examples/vue-ts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@algorade/use-wallet-xchain-evm": "^0.1.0",
+    "@algorandfoundation/algokit-utils": "^9.2.0",
+    "@txnlab/use-wallet": "5.0.0-rc.1",
+    "@txnlab/use-wallet-vue": "5.0.0-rc.1",
+    "@wagmi/connectors": "^5.11.2",
+    "@wagmi/core": "2.21.2",
+    "algo-x-evm-sdk": "^0.1.2",
+    "algosdk": "^3.5.2",
+    "viem": "^2.48.4",
+    "vue": "^3.5.33"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.10",
+    "vite-plugin-node-polyfills": "^0.26.0",
+    "vue-tsc": "^3.2.7"
+  }
+}
