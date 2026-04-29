@@ -1,4 +1,4 @@
-# @questionmarket/use-wallet-xchain-evm
+# @algorade/use-wallet-xchain-evm
 
 xChain EVM wallet adapter for [`@txnlab/use-wallet`](https://github.com/TxnLab/use-wallet) v5. Lets users sign Algorand transactions with an EVM wallet (MetaMask, Brave Wallet, Rabby, any EIP-1193 provider via wagmi). The adapter derives a deterministic Algorand address from each EVM address using the [xChain Accounts](https://github.com/algorandfoundation/xchain-accounts) LogicSig + EIP-712 signing scheme.
 
@@ -11,7 +11,7 @@ The xChain Accounts protocol on Algorand was originally built against `@txnlab/u
 ## Install
 
 ```bash
-pnpm add @questionmarket/use-wallet-xchain-evm @wagmi/core @wagmi/connectors viem algo-x-evm-sdk @algorandfoundation/algokit-utils
+pnpm add @algorade/use-wallet-xchain-evm @wagmi/core @wagmi/connectors viem algo-x-evm-sdk @algorandfoundation/algokit-utils
 # or npm install / yarn add
 ```
 
@@ -23,7 +23,7 @@ You also need `@txnlab/use-wallet@^5` and a framework adapter (e.g. `@txnlab/use
 // lib/wallet/config.ts
 import { WalletManager, type NetworkConfig } from '@txnlab/use-wallet'
 import { pera } from '@txnlab/use-wallet-pera'
-import { xchainEvm } from '@questionmarket/use-wallet-xchain-evm'
+import { xchainEvm } from '@algorade/use-wallet-xchain-evm'
 import { createConfig, http, connect } from '@wagmi/core'
 import { injected } from '@wagmi/connectors'
 import { mainnet } from 'viem/chains'
@@ -61,7 +61,7 @@ The wallet shows up in `useWallet()` like any other adapter. Connecting prompts 
 ## Detecting EVM-derived wallets
 
 ```ts
-import type { XChainWalletMetadata } from '@questionmarket/use-wallet-xchain-evm'
+import type { XChainWalletMetadata } from '@algorade/use-wallet-xchain-evm'
 
 const isEvm = (wallet.metadata as XChainWalletMetadata).isAlgoXEvm === 'EVM'
 ```
@@ -106,7 +106,7 @@ If you use SvelteKit with SSR enabled, externalize the package and its EVM-side 
 ```ts
 ssr: {
   external: [
-    '@questionmarket/use-wallet-xchain-evm',
+    '@algorade/use-wallet-xchain-evm',
     '@wagmi/core',
     '@wagmi/connectors',
     'viem',
@@ -143,24 +143,29 @@ Total incremental cost over a baseline `@txnlab/use-wallet` Svelte/React app: ro
 
 `0.1.0` — beta.
 
-| Area                                     | Status                                           |
-|------------------------------------------|--------------------------------------------------|
-| TypeScript build (`tsdown`)              | ✅ green, ESM + dts                              |
-| TypeScript strict typecheck              | ✅ green                                         |
-| Unit tests (28 tests, 2 files)           | ✅ green, run via `pnpm test`                    |
-| Connect path (existing connection)       | ✅ unit-tested + integration-tested in browser   |
-| Connect path (callback)                  | ✅ unit-tested                                   |
-| Connect path (first-connector fallback)  | ✅ unit-tested                                   |
-| `connector.name === 'Injected'` filter   | ✅ unit-tested                                   |
-| Disconnect                               | ✅ unit-tested                                   |
-| `signTransactions` happy path            | ✅ unit-tested                                   |
-| `signTransactions` indexesToSign filter  | ✅ unit-tested                                   |
-| `signTransactions` already-signed skip   | ✅ unit-tested                                   |
-| `signTransactions` error → onAfterSign   | ✅ unit-tested                                   |
-| `evmAddressMap` recovery from store      | ✅ unit-tested                                   |
-| Multi-signer grouping                    | ✅ unit-tested                                   |
-| `uiHooks` (onBeforeSign / onAfterSign / onConnect) | ✅ unit-tested                         |
-| Network-switch SDK invalidation          | ✅ unit-tested                                   |
+| Area                                                | Status                                                 |
+|-----------------------------------------------------|--------------------------------------------------------|
+| TypeScript build (`tsdown`)                         | ✅ green, ESM + dts                                    |
+| TypeScript strict typecheck                         | ✅ green                                               |
+| Unit tests (28 tests)                               | ✅ green, run via `pnpm test`                          |
+| Integration tests against real algokit localnet (6 tests) | ✅ green, run via `pnpm test:integration` (requires Docker + algokit) |
+| Connect path (existing wagmi connection)            | ✅ unit-tested                                         |
+| Connect path (`getEvmAccounts` callback)            | ✅ unit-tested                                         |
+| Connect path (first-connector fallback)             | ✅ unit-tested                                         |
+| `connector.name === 'Injected'` filter              | ✅ unit-tested                                         |
+| Disconnect                                          | ✅ unit-tested                                         |
+| `signTransactions` happy path                       | ✅ unit-tested                                         |
+| `signTransactions` indexesToSign filter             | ✅ unit-tested                                         |
+| `signTransactions` already-signed skip              | ✅ unit-tested                                         |
+| `signTransactions` error → onAfterSign              | ✅ unit-tested                                         |
+| `evmAddressMap` recovery from store                 | ✅ unit-tested                                         |
+| Multi-signer grouping                               | ✅ unit-tested                                         |
+| `uiHooks` (onBeforeSign / onAfterSign / onConnect)  | ✅ unit-tested                                         |
+| Network-switch SDK invalidation (cache)             | ✅ unit-tested                                         |
+| End-to-end signing round-trip on real algod         | ✅ integration-tested (localnet)                       |
+| Network-binding cryptography (different genesis hash → different signature) | ✅ integration-tested (localnet) |
+| ARC-0001 atomic group with mixed xChain + native signers | ✅ integration-tested (localnet)                  |
+| ASA opt-in error surfacing                          | ✅ integration-tested (localnet)                       |
 
 ## Related projects
 

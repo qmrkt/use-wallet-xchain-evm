@@ -11,8 +11,8 @@
     "noEmit": true,
     "declaration": true,
     "outDir": "dist",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "node"]
   },
-  "include": ["src"],
+  "include": ["src", "integration-tests"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,4 +1,4 @@
-# Contributing to `@questionmarket/use-wallet-xchain-evm`
+# Contributing to `@algorade/use-wallet-xchain-evm`
 
 Issues and PRs welcome. This is a small, focused adapter — keep changes scoped accordingly.
 

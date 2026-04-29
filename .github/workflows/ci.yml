@@ -40,5 +40,5 @@ jobs:
       - name: Verify package contents
         run: |
           pnpm pack
-          tar -tzf questionmarket-use-wallet-xchain-evm-*.tgz | sort
-          rm questionmarket-use-wallet-xchain-evm-*.tgz
+          tar -tzf algorade-use-wallet-xchain-evm-*.tgz | sort
+          rm algorade-use-wallet-xchain-evm-*.tgz

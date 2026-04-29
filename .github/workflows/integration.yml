@@ -1,0 +1,59 @@
+name: Integration
+
+# Manual trigger only — runs the localnet-backed integration suite. Not part of
+# every push because it boots Docker + algokit localnet (~2-3 min per run).
+# Fire from the Actions tab when you want to verify integration coverage hasn't
+# regressed.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install AlgoKit CLI
+        run: pipx install algokit
+
+      - name: Start localnet
+        run: algokit localnet start
+
+      - name: Wait for algod
+        run: |
+          for i in {1..30}; do
+            if curl -fs http://localhost:4001/health > /dev/null 2>&1; then
+              echo "algod ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "algod did not become ready in time"
+          exit 1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run integration tests
+        run: pnpm test:integration
+
+      - name: Stop localnet
+        if: always()
+        run: algokit localnet stop || true

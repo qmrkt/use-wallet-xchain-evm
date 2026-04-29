@@ -1,8 +1,19 @@
 # Changelog
 
-All notable changes to `@questionmarket/use-wallet-xchain-evm` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to `@algorade/use-wallet-xchain-evm` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- **Integration test suite** under `integration-tests/` that runs against a real algokit localnet (Docker). 6 tests across 4 files:
+  - `round-trip.test.ts` — derive → fund → sign → submit → confirm a self-payment, end-to-end against real algod
+  - `network-binding.test.ts` — proves signatures over different genesis hashes differ (cryptographic counterpart to the unit-tested SDK cache invalidation), plus deterministic address derivation across `AlgorandClient` instances
+  - `multi-signer.test.ts` — atomic group with one xChain-derived signer + one native algosdk signer composes correctly and confirms atomically (ARC-0001 multi-wallet)
+  - `opt-in.test.ts` — documents the failure shape when sending an ASA to a non-opted-in derived account
+- `pnpm test:integration` script. Default `pnpm test` is unchanged (unit-only, runs everywhere).
+- viem-based `signTypedData` mock in helpers — produces signatures byte-identical to MetaMask without needing a browser.
+- `@types/node` and `viem` added to `devDependencies`.
 
 ## [0.1.0] — initial release
 
