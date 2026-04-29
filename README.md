@@ -178,7 +178,13 @@ Total incremental cost over a baseline `@txnlab/use-wallet` Svelte/React app: ro
 
 - https://metapost.io/
 
+Brave wallet:
+
 https://github.com/user-attachments/assets/ac514a56-7bf4-4eda-b0de-d59dacddcfab
+
+Metamask:
+
+https://github.com/user-attachments/assets/359b7647-2ad7-455d-9dd0-f9dd361e1d75
 
 
 ## Contributing
